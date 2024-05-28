@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Sun Aug 28 21:09:14 2022
-
 @author: Chenyin Gao
 """
 
@@ -667,43 +665,3 @@ def regime_prec(Y, A, rho, X, d, theta_true,
     regime_opt = prob_sum_NL.argmax(axis = 1)
     
     return (regime_opt_true == regime_opt).mean()
-
-# visualization
-def plot3D_tensor(Y,
-                  N, T, k, ax,
-                  cmp = plt.get_cmap('bwr'),
-                  title_main = None,
-                  vmin = -400, vmax = 800):        
-    # plot of potential outcomes
-    x = range(1, (N+1)); y = range(1, (T+1)); z = range(1, (2**k+1))           
-    points = []
-    for element in itertools.product(x, y, z):
-        points.append(element)
-    xi, yi, zi = zip(*points)
-
-    # select out exact zero entries (i.e. missing)
-    xi_obs = [xi[i] for i in np.where((Y.flatten()!=np.nan))[0]]
-    yi_obs = [yi[i] for i in np.where((Y.flatten()!=np.nan))[0]]
-    zi_obs = [zi[i] for i in np.where((Y.flatten()!=np.nan))[0]]
-    Y_obsi = [Y.flatten()[i] for i in np.where((Y.flatten()!=np.nan))[0]]
-    
-    # full
-    p1 = ax.scatter3D(xi_obs, yi_obs, zi_obs, c = Y_obsi, 
-               cmap = cmp,
-               alpha = 0.5, s = 50,
-               vmin = vmin, vmax = vmax)
-    # fig.colorbar(p1, ax = ax, shrink = 0.5, aspect = 5)
-    # First remove fill
-    ax.xaxis.pane.fill = False
-    ax.yaxis.pane.fill = False
-    ax.zaxis.pane.fill = False
-    # Now set color to white (or whatever is "invisible")
-    ax.xaxis.pane.set_edgecolor('w')
-    ax.yaxis.pane.set_edgecolor('w')
-    ax.zaxis.pane.set_edgecolor('w')
-    # labels
-    # ax.set_xlabel('subject')
-    # ax.set_ylabel('time')
-    # ax.set_zlabel('treatment regime')
-    # ax.set_title(title_main)
-    return p1

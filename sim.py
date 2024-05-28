@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Jun 30 15:36:34 2023
-
-@author: hp
+@author: Chenyin Gao
 """
 from functools import partial
 import numpy as np
@@ -13,6 +11,7 @@ from utils import theta2prob, gen_data_potential_Y_binary, \
     get_theta_binary, get_theta_survival, \
         regime_eval, regime_prec
 import scipy
+import multiprocessing
 def main(seed, N, T, k, d = 3):
     Y, A, delta, X, theta_true, error = gen_data_potential_Y_binary(seed = seed, N = N, T = T, k = k, d = d)
     
@@ -186,17 +185,19 @@ def main(seed, N, T, k, d = 3):
                                               theta_true = theta_true,
                                               theta_hat = theta_hat_w)})
     
-   
-
-    return pd.DataFrame({'loss':loss_prob, 'regret': optimal_out, 'precision': prec_out})
+    # write out the results for subsequent analysis
+    pd.DataFrame({'loss':loss_prob, 'regret': optimal_out, 'precision': prec_out}).\
+        to_csv(f'results_N{N}_T{T}_k{k}_seed{seed}.csv')
 
 
 
 
 if __name__ == '__main__':
-
-    # an example: sample size N = 500, time T = 10 and short-term treatment history k = 3
+    # sample size N = 500, time T = 10 and short-term treatment history k = 3
     N = 500; T = 10; k = 3; d = 3; seed = 2
-    df = main(seed, N = N, T = T, k = k, d = d)
+    numcores = 16 # parallized on a 16-core CPU
+    with multiprocessing.Pool(numcores) as p:
+        main_partial = partial(main, N = N, T = T, k = k)
+        p.map(main_partial, range(100)) # 100 replicated experiments
 
     
