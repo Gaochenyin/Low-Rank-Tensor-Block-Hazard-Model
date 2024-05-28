@@ -3,7 +3,6 @@ The repository is the official implementation of  [Causal Customer Churn Analysi
 
 ## Citation
 
----------------------------------
  ```
 @inproceedings{
 anonymous2024causal,
@@ -18,7 +17,6 @@ url={https://openreview.net/forum?id=ihv6pWuILN}
 
 ## File structure
 
----------------------------------
 * `utils.py`: Essential functions fo data generation, model formulation and estimation
 * `sim.py`: Simulation code for replicating the results in the main paper
 * `Example.ipynb`: One numerical experiment for illustration
