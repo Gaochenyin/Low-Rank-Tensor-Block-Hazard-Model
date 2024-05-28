@@ -11,15 +11,9 @@ import pandas as pd
 import tensorly as tl
 from tensorly import decomposition
 from scipy.special import expit
-# from utils import P_Omega, truncate_vec
-from sklearn.utils.extmath import randomized_svd
-from tensorly.tenalg import kronecker
-from scipy import integrate
 from tensorly import tucker_to_tensor
-import scipy
-from sklearn import svm, tree
-from sklearn.preprocessing import normalize
-from sklearn.linear_model import LogisticRegression, SGDClassifier
+from sklearn import svm
+from sklearn.linear_model import LogisticRegression
 from sklearn.cluster import KMeans
 from sklearn.ensemble import RandomForestClassifier, \
     GradientBoostingClassifier, AdaBoostClassifier, VotingClassifier
@@ -27,7 +21,8 @@ from sklearn.neural_network import MLPClassifier
 from sksurv.linear_model import CoxPHSurvivalAnalysis, CoxnetSurvivalAnalysis
 from sksurv.ensemble import RandomSurvivalForest
 from sksurv.ensemble import GradientBoostingSurvivalAnalysis, ComponentwiseGradientBoostingSurvivalAnalysis
-
+import itertools
+import matplotlib.pyplot as plt
 ## handy functions
 # estimation error in the probably scale
 def theta2prob(theta_hat):
@@ -96,13 +91,13 @@ class TensorCompletionCovariateBinary():
                  Y, A, X, delta = None, rho = None,
                  # optimization parameter
                  stepsize = 1e-10,
-                 momentum = 0.5,
+                 momentum = 0,
                  niters = 5000, tol = 1e-8,
                  r1_list = [4], r2_list = [2], r3_list = [8],
-                 lam_list = None,
+                 lam_list = [0],
                  # split = False, 
                  verbose = True, 
-                 method = 'discrete'):
+                 method = 'block'):
         """
         stepsize: stepsize for projected gradient descent
         tau: the number of iterations
@@ -170,7 +165,7 @@ class TensorCompletionCovariateBinary():
                                                            svd = 'truncated_svd',
                                                           )
         
-        if self.method == 'discrete':
+        if self.method == 'block':
             # k-means on the third mode for discretization
             theta_3 = U_3 @ U_3.T @ tl.unfold(tl.tenalg.multi_mode_dot(
                 tl.tenalg.multi_mode_dot(F_core, [U_1, U_2, U_3], [0, 1, 2]),
@@ -280,7 +275,7 @@ class TensorCompletionCovariateBinary():
             F_core = F_core/G_norm2_max*G_norm2_limit
             
             # update U_3
-            if self.method == 'discrete':
+            if self.method == 'block':
                 # project G onto the restricted set
                 F_core_3 = tl.unfold(tl.tenalg.multi_mode_dot(
                     tl.tenalg.multi_mode_dot(F_core, [U_1, U_2, U_3], [0, 1, 2]),
@@ -672,3 +667,43 @@ def regime_prec(Y, A, rho, X, d, theta_true,
     regime_opt = prob_sum_NL.argmax(axis = 1)
     
     return (regime_opt_true == regime_opt).mean()
+
+# visualization
+def plot3D_tensor(Y,
+                  N, T, k, ax,
+                  cmp = plt.get_cmap('bwr'),
+                  title_main = None,
+                  vmin = -400, vmax = 800):        
+    # plot of potential outcomes
+    x = range(1, (N+1)); y = range(1, (T+1)); z = range(1, (2**k+1))           
+    points = []
+    for element in itertools.product(x, y, z):
+        points.append(element)
+    xi, yi, zi = zip(*points)
+
+    # select out exact zero entries (i.e. missing)
+    xi_obs = [xi[i] for i in np.where((Y.flatten()!=np.nan))[0]]
+    yi_obs = [yi[i] for i in np.where((Y.flatten()!=np.nan))[0]]
+    zi_obs = [zi[i] for i in np.where((Y.flatten()!=np.nan))[0]]
+    Y_obsi = [Y.flatten()[i] for i in np.where((Y.flatten()!=np.nan))[0]]
+    
+    # full
+    p1 = ax.scatter3D(xi_obs, yi_obs, zi_obs, c = Y_obsi, 
+               cmap = cmp,
+               alpha = 0.5, s = 50,
+               vmin = vmin, vmax = vmax)
+    # fig.colorbar(p1, ax = ax, shrink = 0.5, aspect = 5)
+    # First remove fill
+    ax.xaxis.pane.fill = False
+    ax.yaxis.pane.fill = False
+    ax.zaxis.pane.fill = False
+    # Now set color to white (or whatever is "invisible")
+    ax.xaxis.pane.set_edgecolor('w')
+    ax.yaxis.pane.set_edgecolor('w')
+    ax.zaxis.pane.set_edgecolor('w')
+    # labels
+    # ax.set_xlabel('subject')
+    # ax.set_ylabel('time')
+    # ax.set_zlabel('treatment regime')
+    # ax.set_title(title_main)
+    return p1
