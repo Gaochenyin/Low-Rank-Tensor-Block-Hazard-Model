@@ -7,7 +7,7 @@ The repository is the official implementation of  [Causal Customer Churn Analysi
 @inproceedings{
 anonymous2024causal,
 title={Causal Customer Churn Analysis with Low-rank Tensor Block Hazard Model},
-author={Anonymous},
+author={Gao, Chenyin and Zhang, Zhiming and Yang, Shu},
 booktitle={Forty-first International Conference on Machine Learning},
 year={2024},
 url={https://openreview.net/forum?id=ihv6pWuILN}
