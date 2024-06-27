@@ -1,11 +1,11 @@
 # Customer churn analysis with low-rank tensor block hazard model
-The repository is the official implementation of  [Causal Customer Churn Analysis with Low-rank Tensor Block Hazard Model](https://arxiv.org/pdf/2405.11377v1), ICML, 2024. 
+The repository is the official implementation of  [Causal Customer Churn Analysis with Low-rank Tensor Block Hazard Model](https://openreview.net/forum?id=ihv6pWuILN), ICML, 2024. 
 
 ## Citation
 
  ```
 @inproceedings{
-anonymous2024causal,
+gao2024causal,
 title={Causal Customer Churn Analysis with Low-rank Tensor Block Hazard Model},
 author={Gao, Chenyin and Zhang, Zhiming and Yang, Shu},
 booktitle={Forty-first International Conference on Machine Learning},
